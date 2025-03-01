@@ -80,3 +80,25 @@ func DeleteUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Usuario eliminado"})
 }
+
+// Actualizar un usuario
+func UpdateUser(c *gin.Context) {
+	id := c.Param("id")
+
+	var user models.User
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+		return
+	}
+
+	_, err := config.DB.Exec("UPDATE users SET name = $1, email = $2 WHERE id = $3", user.Name, user.Email, id)
+
+	if err != nil {
+		log.Println("Error al actualizar usuario:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al actualizar usuario"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Usuario actualizado"})
+}
